@@ -1,4 +1,5 @@
 import scala.util._
+import iarray._
 
 /**
  * calculates a wavefront using IArrays
