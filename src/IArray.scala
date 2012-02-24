@@ -5,6 +5,7 @@ import scala.collection.immutable.Vector
 
 /**
  * IArray structure for distributed calculations
+ * TODO how to implement nice out-of-order folding
  */
 class IArray[A](n1: Int) extends IndexedSeq[Future[A]] {
 
@@ -16,6 +17,10 @@ class IArray[A](n1: Int) extends IndexedSeq[Future[A]] {
   /**
    * compacted array, i.e. future of an array. completes when all elements are
    * assigned
+   * TODO best would be to have IArray extends Future[IndexedSeq[A]]. This does
+   * not work because of clashes in the combinators. e.g.:
+   * map[B](f: (IndexedSeq[A]) => B) from Future[IndexedSeq[A]]
+   * map[B](f: (Future[A]) => B)     from IndexedSeq[Future[A]]
    */
   lazy val compact = {
     val init = promise[List[A]].success(Nil)
@@ -27,18 +32,17 @@ class IArray[A](n1: Int) extends IndexedSeq[Future[A]] {
   
   /**
    * late-updates an element
-   * TODO if i fails, this should fail compact
    */
   def update(i: Future[Int], x: Future[A]): Unit = i onComplete {
     case Success(i) => update(i,x)
-    case Failure(e) => throw e 
+    case Failure(e) => throw e // TODO this should fail this.compact (or this)
   }
   /**
    * late-updates an element
    */
   def update(i: Future[Int], x: =>A): Unit = i onComplete {
     case Success(i) => update(i,x)
-    case Failure(e) => throw e 
+    case Failure(e) => throw e // TODO this should fail this.compact (or this)
   }
   
   /**
