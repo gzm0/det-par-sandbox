@@ -18,7 +18,9 @@ object Histogram extends App {
   
   // Populate histogram (note that the RHS is passed by-name)
   for (i <- 0 to nc-1)
-    hist(i) = values.compact.map(_.filter(_ == i).length)
+    hist(i) = values.map(
+      res => res.map(v => if (i == v) 1 else 0) ).fold(valToFut(0))(
+       (x,y) => for(i<-x;j<-y) yield i+j )
     
   // Display hist once it is finished
   hist.compact onComplete { 
