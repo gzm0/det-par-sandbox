@@ -1,0 +1,1 @@
+scalaHome := Some(file("/opt/scala/build/pack"))
