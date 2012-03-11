@@ -15,3 +15,7 @@ class MArray[A](val x: IndexedSeq[MFuture[A]])
   }
   
 }
+
+object MArray {
+  def ofDim[A](n: Int) = IndexedSeq.fill(n)(new MPromise[A]())
+}

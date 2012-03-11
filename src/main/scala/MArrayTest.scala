@@ -3,9 +3,8 @@ import mvar._
 object MArrayTest extends App {
 
   val n = 10
-  val x = IndexedSeq.fill(n)(new MPromise[Int]()) 
-  val y = IndexedSeq.fill(n)(new MPromise[Int]())
-  
+  val x = MArray.ofDim[Int](n)
+  val y = MArray.ofDim[Int](n)
   
   val z = x.dot[Int,Int](_ * _, _ + _)(y)
   

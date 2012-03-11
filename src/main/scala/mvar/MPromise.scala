@@ -40,6 +40,8 @@ class MPromise[T] extends MFuture[T] {
 
   def tryFailure(i: Int, t: Throwable): Boolean = tryComplete(i,Failure(t))
   
+  def complete(i: Int, result:Try[T]): this.type = if (tryComplete(i,result)) this else throwCompleted
+  
   private def throwCompleted =
     throw new IllegalStateException("Promise already completed.")
   
