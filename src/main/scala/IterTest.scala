@@ -9,10 +9,10 @@ object IterTest extends App {
   val x = new MPromise[Int]()
   
   // Now define our iteration
-  val result = x.iter((i,ign) => i < 1000) { x =>
+  val result = iterate (x) ((i,ign) => i < 1000) { x =>
     x map (_ + 1)
   }
-  
+    
   // Now initialize x
   x.success(0,1)
   
