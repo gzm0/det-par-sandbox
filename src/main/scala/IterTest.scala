@@ -9,15 +9,16 @@ object IterTest extends App {
   val x = new MPromise[Int]()
   
   // Now define our iteration
-  val result = iterate (x) ((i,ign) => i < 1000) { x =>
-    x map (_ + 1)
+  val result = iterate (x) (max_iter(10)) { v =>
+    v onSuccess shdebug("v")
+    iterate (v) (max_iter(10)) {_ map (_ + 1)}
   }
     
   // Now initialize x
-  x.success(0,1)
+  x.success(Nil,0)
   
   result onSuccess {
-    case (i,s) => println("%d: %s".format(i,s))
+    case (i,s) => println("%s: %s".format(i,s))
   }
   
 }

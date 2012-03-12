@@ -9,9 +9,9 @@ object MVarTest extends App {
   
   y onComplete { (i,x) => println(i + " " + x) }
   
-  x.tryComplete(0,Success(1))
-  x.tryComplete(1,Success(4))
-  x.tryComplete(2,Success(9))
-  x.tryComplete(3,Success(2))
+  x.tryComplete(0 :: Nil,Success(1))
+  x.tryComplete(1 :: Nil,Success(4))
+  x.tryComplete(2 :: Nil,Success(9))
+  x.tryComplete(3 :: Nil,Success(2))
   
 }

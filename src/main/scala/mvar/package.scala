@@ -1,5 +1,6 @@
 import scala.concurrent._
 import scala.util._
+import scala.PartialFunction
 
 package object mvar {
 
@@ -8,14 +9,81 @@ package object mvar {
     s map { x => toMFuture(future(x)) }
   implicit def toMFuture[A](x: Future[A]) = new FutureMFuture(x)
   
-  // TODO change definition of while to have Future[Boolean] as result
-  // TODO this should actually be on top of a Future...
   def iterate[T]
     (x: MFuture[T])
-    (`while`: (Int,Try[T]) => Boolean)
+    (cond: MFuture[T] => MFuture[Boolean])
+    (update: MFuture[T] => MFuture[T]) = {
+    
+    val iter_in   = new MPromise[T]
+    val iter_cond = cond(iter_in)
+    val iter_go   = new MPromise[T]
+    val iter_end  = update(iter_go)
+    val end       = new MPromise[T]
+    
+    
+    x.onComplete((is,v) => iter_in.complete(0 :: is, v))
+    iter_end.onComplete(iter_in.complete _)
+    
+    // TODO need to handle failures differently to recover gracefully in loop
+    // if possible
+    (iter_in zip iter_cond) onComplete {
+      case (i :: is, Failure(t))          => end.failure(is,t)
+      case (i :: is, Success((v, true ))) => iter_go.success(i+1 :: is, v)
+      case (i :: is, Success((v, false))) => end.success(is, v)
+      case (Nil,_) =>
+        throw new IllegalStateException("Index cannot be Nil inside iteration")
+    }
+    
+    iter_in   onSuccess shdebug("in")
+    iter_cond onSuccess shdebug("cond")
+    iter_go   onSuccess shdebug("go")
+    iter_end  onSuccess shdebug("end")
+    
+    end
+    
+  }
+  
+  def max_iter[T](i: Int) = (v: MFuture[T]) => v.mapi((is,v) => is.head < i)    
+  
+  def shdebug[T](varn: String): PartialFunction[(MFuture.Index,T),Unit] = {
+    case (is,v) => println("%-4s @ %s : %s".format(varn,is.toString,v.toString))
+  }
+  
+  /*
+  // TODO support multiple iterations
+  def iterate[T]
+    (x: MFuture[T])
+    (cond: MFuture[T] => MFuture[Boolean])
     (update: (MFuture[T]) => MFuture[T]) = {
     
-    val p_iter_start = new MPromise[T]()
+    val p_iter_start = new MPromise[T]
+    val p_iter_end   = update(p_iter_start.mfuture)
+    val p_end  = new MPromise[T]
+    
+    (p_iter_end zip cond(p_iter_end)) onComplete {
+      case (i,Success((xv,true)) ) => p_iter_start.success(i+1,xv)
+      case (i,Success((xv,false))) => p_end.success(0,xv)
+      case (i,Failure(t)       )   => p_end.failure(0,t)
+    }
+    
+    // TODO cond has wrong iteration number
+    (x zip cond(x)) onComplete {
+      case (i,Success((xi,true ))) => p_iter_start.success(0,xi)
+      case (i,Success((xi,false))) => p_end.success(0,xi)
+      case (i,Failure(t)       )   => p_end.failure(0,t)
+    }
+    
+    p_end.mfuture
+    
+  }*/
+  
+  /*
+  def iterate[T,U]
+    (x: MFuture[T], y: MFuture[U])
+    (cond: (Int,MFuture[T],MFuture[U]) => MFuture[Boolean])
+    (update: (MFuture[T],MFuture[U]) => (MFuture[T],MFuture[U])) = {
+    
+    val p_iter_start = new MPromise[(T,U)]()
     val p_iter_end   = update(p_iter_start.mfuture)
     val p_end  = new MPromise[T]()
     
@@ -33,5 +101,6 @@ package object mvar {
     p_end.mfuture
     
   }
+  */
   
 }

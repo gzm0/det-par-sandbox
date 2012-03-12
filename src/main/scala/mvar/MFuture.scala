@@ -5,21 +5,25 @@ import scala.concurrent._
 
 trait MFuture[T] {
 
-  def onComplete[U](func: (Int,Try[T]) => U): this.type
+  def onComplete[U](func: (MFuture.Index,Try[T]) => U): this.type
  
   def autoFlush_=(v: Boolean): Unit
   
   // What follows is stolen :D
   
   def map[S](f: T => S): MFuture[S] = {
+    this mapi { (i,x) => f(x) }
+  }
+  
+  def mapi[S](f: (MFuture.Index,T) => S): MFuture[S] = {
     val p = new MPromise[S]()
     
     onComplete {
-      case (i,Failure(t)) => p.failure(i,t)
-      case (i,Success(v)) =>
-        try p.success(i,f(v))
+      case (is,Failure(t)) => p.failure(is,t)
+      case (is,Success(v)) =>
+        try p.success(is,f(is,v))
         catch {
-          case t => p.failure(i,t)
+          case t => p.failure(is,t)
         }
     }
     
@@ -43,21 +47,25 @@ trait MFuture[T] {
     p.mfuture
   }
   
-  def onSuccess[U](pf: PartialFunction[(Int,T), U]): this.type = onComplete {
+  def onSuccess[U](pf: PartialFunction[(MFuture.Index,T), U]): this.type = onComplete {
     case (i,Failure(t)) => // do nothing
     case (i,Success(v)) => if (pf isDefinedAt (i,v)) pf(i,v) else { /*do nothing*/ }
   }
 
-  def onFailure[U](callback: PartialFunction[(Int,Throwable), U]): this.type = onComplete {
+  def onFailure[U](callback: PartialFunction[(MFuture.Index,Throwable), U]): this.type = onComplete {
     case (i,Failure(t)) => if (callback.isDefinedAt(i,t)) callback(i,t) else { /*do nothing*/ }
     case (i,Success(v)) => // do nothing
   }
   
 }
 
+object MFuture {
+  type Index = List[Int]
+}
+
 private[mvar] class FutureMFuture[T](f: Future[T]) extends MFuture[T] {
-  def onComplete[U](func: (Int,Try[T]) => U) = {
-    f onComplete (func.curried(0))
+  def onComplete[U](func: (MFuture.Index,Try[T]) => U) = {
+    f onComplete (func.curried(0 :: Nil))
     this
   }
   def autoFlush_=(v: Boolean) = {}

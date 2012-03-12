@@ -12,7 +12,7 @@ object MArrayTest extends App {
     case (i,s) => println("%d: %s".format(i,s))
   }
   
-  for (i <- 0 to 5) x foreach { _ success (i,i+1) }
-  for (i <- 0 to 5) y foreach { _ success (i,i-1) }
+  for (i <- 0 to 5) x foreach { _ success (i :: Nil,i+1) }
+  for (i <- 0 to 5) y foreach { _ success (i :: Nil,i-1) }
   
 }

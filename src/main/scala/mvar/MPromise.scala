@@ -6,11 +6,11 @@ import scala.collection.mutable._
 // TODO this is not threadsafe
 class MPromise[T] extends MFuture[T] {
 
-  val listeners: Set[(Int,Try[T]) => Any] = Set.empty
-  val vals: Map[Int,Try[T]] = Map.empty
+  val listeners: Set[(MFuture.Index,Try[T]) => Any] = Set.empty
+  val vals: Map[MFuture.Index,Try[T]] = Map.empty
   var aflush = false
   
-  def tryComplete(v: Int, result: Try[T]) = {
+  def tryComplete(v: MFuture.Index, result: Try[T]) = {
     val ok = !vals.contains(v)
     if (ok && !aflush) vals(v) = result
     listeners foreach { f => f(v,result) }
@@ -19,7 +19,7 @@ class MPromise[T] extends MFuture[T] {
   
   def mfuture = this
   
-  def onComplete[U](func: (Int,Try[T]) => U) = {
+  def onComplete[U](func: (MFuture.Index,Try[T]) => U) = {
     listeners += func
     vals.foreach(Function.tupled(func))
     this
@@ -32,17 +32,17 @@ class MPromise[T] extends MFuture[T] {
   
   // What follows is stolen
   
-  def success(i: Int, v: T): this.type = if (trySuccess(i,v)) this else throwCompleted
+  def success(i: MFuture.Index, v: T): this.type = if (trySuccess(i,v)) this else throwCompleted(i)
 
-  def trySuccess(i: Int, value: T): Boolean = tryComplete(i,Success(value))
+  def trySuccess(i: MFuture.Index, value: T): Boolean = tryComplete(i,Success(value))
 
-  def failure(i: Int, t: Throwable): this.type = if (tryFailure(i,t)) this else throwCompleted
+  def failure(i: MFuture.Index, t: Throwable): this.type = if (tryFailure(i,t)) this else throwCompleted(i)
 
-  def tryFailure(i: Int, t: Throwable): Boolean = tryComplete(i,Failure(t))
+  def tryFailure(i: MFuture.Index, t: Throwable): Boolean = tryComplete(i,Failure(t))
   
-  def complete(i: Int, result:Try[T]): this.type = if (tryComplete(i,result)) this else throwCompleted
+  def complete(i: MFuture.Index, result:Try[T]): this.type = if (tryComplete(i,result)) this else throwCompleted(i)
   
-  private def throwCompleted =
-    throw new IllegalStateException("Promise already completed.")
+  private def throwCompleted(i: MFuture.Index) =
+    throw new IllegalStateException("Promise already completed at index %s.".format(i))
   
 }
