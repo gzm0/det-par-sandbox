@@ -4,15 +4,20 @@ import scala.PartialFunction
 
 package object mvar {
 
+  type DWhileCond[T]   = MFuture[T] => MFuture[Boolean]
+  type DWhileUpdate[T] = MFuture[T] => MFuture[T]
+  
   implicit def toMArray[A](s: IndexedSeq[MFuture[A]]) = new MArray[A](s)
   implicit def toStaticMArray[A](s: IndexedSeq[A]) =
     s map { x => toMFuture(future(x)) }
   implicit def toMFuture[A](x: Future[A]) = new FutureMFuture(x)
   
+  def dwhile[T](cond: DWhileCond[T]) = new DWhileHolder(cond)
+  
   def iterate[T]
     (x: MFuture[T])
-    (cond: MFuture[T] => MFuture[Boolean])
-    (update: MFuture[T] => MFuture[T]) = {
+    (cond: DWhileCond[T])
+    (update: DWhileUpdate[T]) = {
     
     val iter_in   = new MPromise[T]
     val iter_cond = cond(iter_in)
@@ -43,7 +48,8 @@ package object mvar {
     
   }
   
-  def max_iter[T](i: Int) = (v: MFuture[T]) => v.mapi((is,v) => is.head < i)    
+  def max_iter[T](i: Int): DWhileCond[T] =
+    (v: MFuture[T]) => v.mapi((is,v) => is.head < i)    
   
   def shdebug[T](varn: String): PartialFunction[(MFuture.Index,T),Unit] = {
     case (is,v) => println("%-4s @ %s : %s".format(varn,is.toString,v.toString))

@@ -9,9 +9,11 @@ object IterTest extends App {
   val x = new MPromise[Int]()
   
   // Now define our iteration
-  val result = iterate (x) (max_iter(10)) { v =>
-    v onSuccess shdebug("v")
-    iterate (v) (max_iter(10)) {_ map (_ + 1)}
+  val result = {
+    dwhile(max_iter(10)) using x over { v =>
+      v onSuccess shdebug("v")
+      dwhile(max_iter(10)) using v over {_ map (_ + 1)}
+    }
   }
     
   // Now initialize x
