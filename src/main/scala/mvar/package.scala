@@ -49,6 +49,61 @@ package object mvar {
     
   }
   
+  def iterate[A,B,C]
+    (x1: MFuture[A], x2: MFuture[B], x3: MFuture[C])
+    (cond: (MFuture[A],MFuture[B],MFuture[C]) => MFuture[Boolean])
+    (update: (MFuture[A],MFuture[B],MFuture[C]) =>
+             (MFuture[A],MFuture[B],MFuture[C])) = {
+    
+    val iter_in1   = new MPromise[A]
+    val iter_in2   = new MPromise[B]
+    val iter_in3   = new MPromise[C]
+    
+    val iter_cond = cond(iter_in1,iter_in2,iter_in3)
+    
+    val iter_go1   = new MPromise[A]
+    val iter_go2   = new MPromise[B]
+    val iter_go3   = new MPromise[C]
+    
+    val iter_end1  = update(iter_go)
+    val iter_end2  = update(iter_go)
+    val iter_end3  = update(iter_go)
+    
+    val end1 = new MPromise[T]
+    val end2 = new MPromise[T]
+    val end3 = new MPromise[T]
+    
+    val end       = new MPromise[T]
+    
+    
+    x1.onComplete((is,v) => iter_in1.complete(0 :: is, v))
+    iter_end1.onComplete(iter_in1.complete _)
+    
+    x2.onComplete((is,v) => iter_in2.complete(0 :: is, v))
+    iter_end2.onComplete(iter_in2.complete _)
+    
+    x3.onComplete((is,v) => iter_in3.complete(0 :: is, v))
+    iter_end3.onComplete(iter_in3.complete _)
+    
+    // TODO need to handle failures differently to recover gracefully in loop
+    // if possible
+    (iter_in zip iter_cond) onComplete {
+      case (i :: is, Failure(t))          => end.failure(is,t)
+      case (i :: is, Success((v, true ))) => iter_go.success(i+1 :: is, v)
+      case (i :: is, Success((v, false))) => end.success(is, v)
+      case (Nil,_) =>
+        throw new IllegalStateException("Index cannot be Nil inside iteration")
+    }
+    
+    iter_in   onSuccess shdebug("in")
+    iter_cond onSuccess shdebug("cond")
+    iter_go   onSuccess shdebug("go")
+    iter_end  onSuccess shdebug("end")
+    
+    end
+    
+  }
+  
   def max_iter[T](i: Int): DWhileCond[T] =
     (v: MFuture[T]) => v.mapi((is,v) => is.head < i)    
   
