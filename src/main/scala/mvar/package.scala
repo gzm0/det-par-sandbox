@@ -49,6 +49,7 @@ package object mvar {
     
   }
   
+/*
   def iterate[A,B,C]
     (x1: MFuture[A], x2: MFuture[B], x3: MFuture[C])
     (cond: (MFuture[A],MFuture[B],MFuture[C]) => MFuture[Boolean])
@@ -65,15 +66,14 @@ package object mvar {
     val iter_go2   = new MPromise[B]
     val iter_go3   = new MPromise[C]
     
-    val iter_end1  = update(iter_go)
-    val iter_end2  = update(iter_go)
-    val iter_end3  = update(iter_go)
+    val (iter_end1,iter_end2,iter_end3) =
+      update(iter_go1,iter_go2,iter_go3)
     
-    val end1 = new MPromise[T]
-    val end2 = new MPromise[T]
-    val end3 = new MPromise[T]
+    val end1 = new MPromise[A]
+    val end2 = new MPromise[B]
+    val end3 = new MPromise[C]
     
-    val end       = new MPromise[T]
+    val end  = new MPromise[(A,B,C)]
     
     
     x1.onComplete((is,v) => iter_in1.complete(0 :: is, v))
@@ -103,6 +103,7 @@ package object mvar {
     end
     
   }
+  */
   
   def max_iter[T](i: Int): DWhileCond[T] =
     (v: MFuture[T]) => v.mapi((is,v) => is.head < i)    
