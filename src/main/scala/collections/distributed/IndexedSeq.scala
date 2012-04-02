@@ -8,8 +8,7 @@ import scala.collection.GenSeq
  * (N.B. ++, ++:, flatMap, flatten) 
  * require a complex referential inner data structure, if we do not implement
  * a FutureIndexedSeq[A] as a IndexedSeq[Future[A]]. How can we handle this?
- * 
- * Have a look at scala.collection.mutable.IndexedSeqView
+ * --> Have a look at scala.collection.mutable.IndexedSeqView
  *
  * TBD: how to handle indexes? Do we allow for "lazy" indexes
  * How do we handle sizes? Do we allow for structures where the size
