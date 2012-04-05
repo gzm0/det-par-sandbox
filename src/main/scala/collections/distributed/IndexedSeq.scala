@@ -10,15 +10,32 @@ import scala.collection.GenSeq
  * a FutureIndexedSeq[A] as a IndexedSeq[Future[A]]. How can we handle this?
  * --> Have a look at scala.collection.mutable.IndexedSeqView
  *
- * TBD: how to handle indexes? Do we allow for "lazy" indexes
- * How do we handle sizes? Do we allow for structures where the size
+ * TBD: how to handle indices? Do we allow for "lazy" indices
+ * 
+ * TBD: How do we handle sizes? Do we allow for structures where the size
  * is not yet known? (look at dropWhile, partition, takeWhile)
  *
  * TBD: how to handle builders and multi dimensionality. Look at
  * transpose. Raises also issue of size.
  *
- * TBD: FutureTuple? Difference between Future[(A,B)],(Future[A],Future[B])
+ * TBD: FutureTuple? Difference between Future[(A,B)],(Future[A],Future[B]). Especially w.r.t. zip/zip3
  *
+ * TBD: Numeric: is this associative/commutative?
+ * 
+ * TBD: how to express Futured functions? (see aggregate)
+ *
+ * TBD: side effects?
+ *
+ * TBD: iterator?
+ *
+ * TBD: FutureOrdering?
+ *
+ * TBD: equals
+ * 
+ * TODO: combinations?
+ * TODO: diff?
+ * TODO: scan?
+ * TODO: intersect?
  * TODO: put all the CanBuildFrom again
  */
 trait FutureIndexedSeq[+A] extends PartialFunction[Int,Future[A]] {
