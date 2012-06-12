@@ -1,5 +1,12 @@
 \documentclass[fleqn]{scrartcl}
 
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{tocbibind}
+\usepackage{listings}
+
+\lstset{language=scala}
+
 \subject{Semester Project}
 \title{Deterministic Parallelism in Scala}
 \author{Tobias Schlatter}
@@ -25,6 +32,9 @@ The goal was to implement IVars/IArrays as in [...] using scala
 futures [...].
 
 \subsection{IArrays}
+\begin{lstlisting}
+  val x = 1
+\end{lstlisting}
 How IArrays are implemented. Show use cases.
 
 \subsection{Compacting \& Inheritance}
@@ -39,6 +49,8 @@ interface, show use-cases.
 \subsection{Error Handling}
 show ftry { ... } fcatch { ... }
 
+\subsection{Findings}
+
 \section{Dataflow}
 Quickly outline most important traits of FlowPool, show some graphs
 (of MultiLane), reference paper.
@@ -48,6 +60,11 @@ Quickly outline most important traits of FlowPool, show some graphs
 \subsection{Dataflow}
 
 \section{Conclusion}
+
+\nocite{*}
+
+\bibliography{report}{}
+\bibliographystyle{plain}
 
 \end{document}
 

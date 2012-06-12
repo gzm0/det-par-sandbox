@@ -9,4 +9,7 @@ target/
 *.toc
 *.aux
 *~
+*.bbl
+*.blg
+*.out
 report/auto
