@@ -1,0 +1,58 @@
+\documentclass[fleqn]{scrartcl}
+
+\subject{Semester Project}
+\title{Deterministic Parallelism in Scala}
+\author{Tobias Schlatter}
+\publishers{Advisor Prof. Martin Odersky, LAMP, EPFL}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  This is the abstract
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+\section{Related Work}
+Steal from Paper?
+
+\section{Single Assignment}
+The goal was to implement IVars/IArrays as in [...] using scala
+futures [...].
+
+\subsection{IArrays}
+How IArrays are implemented. Show use cases.
+
+\subsection{Compacting \& Inheritance}
+IArray[T] inherits IndexedSeq[Future[T]] but should also be
+Future[IndexedSeq[T]] blah... general stuff about granularity of
+assignment
+
+\subsection{Iteration \& MultiFutures}
+How iteration is implemented. Show iteration and multifuture
+interface, show use-cases.
+
+\subsection{Error Handling}
+show ftry { ... } fcatch { ... }
+
+\section{Dataflow}
+Quickly outline most important traits of FlowPool, show some graphs
+(of MultiLane), reference paper.
+
+\section{Further Research}
+\subsection{Single Assignment}
+\subsection{Dataflow}
+
+\section{Conclusion}
+
+\end{document}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

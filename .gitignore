@@ -3,3 +3,10 @@
 .project
 .settings/
 target/
+*.dvi
+*.pdf
+*.log
+*.toc
+*.aux
+*~
+report/auto
